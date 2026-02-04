@@ -644,7 +644,7 @@ class Env:
                 "questing",
             ):
                 install_deps = DOCKERFILE_UBUNTU_REM_USER + DOCKERFILE_BUILD_DEBIAN_DEPS
-            package_pattern = f"dangerzone_{version}-*_*.deb"
+            package_pattern = f"dangerzone_{version}*_*.deb"
             package_src = self.find_dz_package(git_root() / "deb_dist", package_pattern)
             package = package_src.name
             package_dst = build_dir / package
