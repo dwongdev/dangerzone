@@ -10,10 +10,6 @@ Dangerzone works like this: You give it a document that you don't know if you ca
 
 _Read more about Dangerzone in the [official site](https://dangerzone.rocks/about/)._
 
-> [!NOTE]
-> 🎅 Check out our [Christmas security challenge](https://dangerzone.rocks/news/2025-12-10-santa-pwn/), in which we ask security researchers to craft a _naughty_ letter that can pwn Dangerzone in Santa's laptop, and earn a bounty of up to $3,000.
-> Promise it makes sense. 🎄
-
 ## Getting started
 
 Follow the instructions for each platform:
