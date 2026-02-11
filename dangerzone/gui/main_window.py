@@ -942,6 +942,16 @@ class ConversionWidget(QtWidgets.QWidget):
         )
         self.documents_list.hide()
 
+        self.restart_button = QtWidgets.QPushButton("Start another conversion")
+        self.restart_button.clicked.connect(self.reset_for_new_conversion)
+        self.restart_button.hide()
+        self.restart_button_layout = QtWidgets.QHBoxLayout()
+        self.restart_button_layout.addStretch()
+        self.restart_button_layout.addWidget(self.restart_button)
+        self.restart_button_layout.addStretch()
+
+        self.documents_list.all_conversions_finished.connect(self.restart_button.show)
+
         # Enqueued widget
         self.enqueued_widget = QtWidgets.QWidget()
         enqueued_layout = QtWidgets.QHBoxLayout()
@@ -975,6 +985,7 @@ class ConversionWidget(QtWidgets.QWidget):
         layout.addWidget(self.settings_widget, stretch=1)
         layout.addWidget(self.enqueued_widget)
         layout.addWidget(self.documents_list, stretch=1)
+        layout.addLayout(self.restart_button_layout)
         layout.addWidget(self.doc_selection_wrapper, stretch=1)
         self.setLayout(layout)
 
@@ -1033,6 +1044,14 @@ class ConversionWidget(QtWidgets.QWidget):
 
         if len(docs) > 0:
             self.documents_added.emit(docs)
+
+    def reset_for_new_conversion(self) -> None:
+        self.dangerzone.clear_documents()
+        self.documents_list.clear()
+        self.documents_list.hide()
+        self.restart_button.hide()
+        self.doc_selection_wrapper.show()
+        self.conversion_started = False
 
     def start_clicked(self) -> None:
         self.conversion_started = True
@@ -1560,6 +1579,8 @@ class ConvertTask(QtCore.QObject):
 
 
 class DocumentsListWidget(QtWidgets.QListWidget):
+    all_conversions_finished = QtCore.Signal()
+
     def __init__(self, dangerzone: DangerzoneGui) -> None:
         super().__init__()
         self.dangerzone = dangerzone
@@ -1606,7 +1627,12 @@ class DocumentsListWidget(QtWidgets.QListWidget):
             doc_widget = self.docs_list_widget_map[doc]
             task.update.connect(doc_widget.update_progress)
             task.finished.connect(doc_widget.all_done)
+            task.finished.connect(self._on_doc_done)
             self.thread_pool.apply_async(task.convert_document)
+
+    def _on_doc_done(self) -> None:
+        if all(doc.is_safe() or doc.is_failed() for doc in self.docs_list):
+            self.all_conversions_finished.emit()
 
     def get_ocr_lang(self) -> Optional[str]:
         ocr_lang = None
