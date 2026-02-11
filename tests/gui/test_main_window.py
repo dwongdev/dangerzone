@@ -1149,3 +1149,81 @@ class TestShutdown:
         window.closeEvent(event)
         assert event.isAccepted() is False  # Ignored because shutdown thread takes over
         mock_begin_shutdown.assert_called_once_with(2)
+
+
+class TestRestartConversion:
+    def test_restart_button_hidden_initially(
+        self, conversion_widget: ConversionWidget
+    ) -> None:
+        assert conversion_widget.restart_button.isHidden()
+
+    def test_restart_button_shown_when_all_conversions_finish(
+        self, conversion_widget: ConversionWidget, qtbot: QtBot
+    ) -> None:
+        with qtbot.waitSignal(
+            conversion_widget.documents_list.all_conversions_finished
+        ):
+            conversion_widget.documents_list.all_conversions_finished.emit()
+        assert not conversion_widget.restart_button.isHidden()
+
+    def test_signal_emitted_only_when_all_docs_done(
+        self,
+        conversion_widget: ConversionWidget,
+        qtbot: QtBot,
+        sample_pdf: str,
+        sample_doc: str,
+    ) -> None:
+        doc1 = Document(sample_pdf)
+        doc2 = Document(sample_doc)
+        conversion_widget.documents_list.docs_list = [doc1, doc2]
+
+        doc1.state = Document.STATE_SAFE
+        with qtbot.assertNotEmitted(
+            conversion_widget.documents_list.all_conversions_finished
+        ):
+            conversion_widget.documents_list._on_doc_done()
+
+        doc2.state = Document.STATE_FAILED
+        with qtbot.waitSignal(
+            conversion_widget.documents_list.all_conversions_finished
+        ):
+            conversion_widget.documents_list._on_doc_done()
+
+    def test_reset_clears_state(
+        self,
+        conversion_widget: ConversionWidget,
+        qtbot: QtBot,
+        sample_pdf: str,
+    ) -> None:
+        doc = Document(sample_pdf)
+        conversion_widget.dangerzone.add_document(doc)
+        conversion_widget.documents_list.documents_added([doc])
+        conversion_widget.conversion_started = True
+        conversion_widget.documents_list.show()
+        conversion_widget.restart_button.show()
+        conversion_widget.doc_selection_wrapper.hide()
+
+        qtbot.mouseClick(
+            conversion_widget.restart_button, QtCore.Qt.MouseButton.LeftButton
+        )
+
+        assert not conversion_widget.conversion_started
+        assert conversion_widget.documents_list.isHidden()
+        assert conversion_widget.restart_button.isHidden()
+        assert not conversion_widget.doc_selection_wrapper.isHidden()
+        assert conversion_widget.documents_list.docs_list == []
+        assert len(conversion_widget.dangerzone.get_unconverted_documents()) == 0
+
+    def test_new_conversion_after_reset(
+        self,
+        conversion_widget: ConversionWidget,
+        sample_pdf: str,
+    ) -> None:
+        conversion_widget.documents_selected([Document(sample_pdf)])
+        conversion_widget.conversion_started = True
+        conversion_widget.reset_for_new_conversion()
+
+        conversion_widget.documents_selected([Document(sample_pdf)])
+
+        assert len(conversion_widget.dangerzone.get_unconverted_documents()) == 1
+        assert not conversion_widget.settings_widget.isHidden()
