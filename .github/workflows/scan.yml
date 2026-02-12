@@ -1,4 +1,4 @@
-name: Scan latest app and container
+name: Scan nightly app and container
 on:
   push:
     branches:
@@ -47,11 +47,6 @@ jobs:
           fail-build: false
           only-fixed: false
           severity-cutoff: critical
-      - name: Upload container scan report
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: ${{ steps.scan_container.outputs.sarif }}
-          category: container
       - name: Inspect container scan report
         run: cat ${{ steps.scan_container.outputs.sarif }}
       - name: Scan container image
@@ -82,11 +77,6 @@ jobs:
           fail-build: false
           only-fixed: false
           severity-cutoff: critical
-      - name: Upload application scan report
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: ${{ steps.scan_app.outputs.sarif }}
-          category: app
       - name: Inspect application scan report
         run: cat ${{ steps.scan_app.outputs.sarif }}
       - name: Scan application
