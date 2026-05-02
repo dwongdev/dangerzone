@@ -95,7 +95,6 @@ exclude = [
 	"dangerzone/podman/command/",
 	"dangerzone/podman/errors/",
 	"dangerzone/podman/errors/",
-	"tests/test_docs_large/",
 ]
 
 [tool.ruff.lint]
