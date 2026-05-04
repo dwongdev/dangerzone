@@ -5,9 +5,16 @@
 # to open in macOS when double-clicking, not just when running from the terminal or opening
 # with a file.
 import os
+import sys
 
 os.environ["LANG"] = "en_US.UTF-8"
 
-import dangerzone
+# This binary is also symlinked as `dangerzone-cli`, so dispatch to the right
+# entry point based on argv[0].
+basename = os.path.basename(sys.argv[0])
+if basename in ["dangerzone-cli", "dangerzone-cli.exe"]:
+    from dangerzone.cli import run
+else:
+    from dangerzone.gui.run import run
 
-dangerzone.main()
+run()

@@ -8,4 +8,4 @@ os.environ["LANG"] = "en_US.UTF-8"
 
 from dangerzone.updater import cli
 
-cli.main()
+cli.run()

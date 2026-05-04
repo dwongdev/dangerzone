@@ -16,6 +16,7 @@ since 0.4.1, and this project adheres to [Semantic Versioning](https://semver.or
   ([#1238](https://github.com/freedomofpress/dangerzone/issues/1238))
 - Update Linux .desktop file with missing MIME types for HWP and ODF formats ([#646](https://github.com/freedomofpress/dangerzone/issues/646))
 - Elide long filenames in the filename label to prevent UI elements from being pushed off-screen ([#143](https://github.com/freedomofpress/dangerzone/issues/143))
+- Fix macOS app bundle build, which crashed at startup with `module 'dangerzone' has no attribute 'main'` after the CLI parsing refactor ([#1470](https://github.com/freedomofpress/dangerzone/issues/1470))
 
 ### Added
 
